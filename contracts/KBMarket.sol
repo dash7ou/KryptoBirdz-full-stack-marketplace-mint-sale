@@ -60,7 +60,7 @@ contract KBMarket is ReentrancyGuard {
     }
 
     //
-    function mintMarketItem(
+    function makeMarketItem(
         address nftContract,
         uint256 tokenId,
         uint256 price
