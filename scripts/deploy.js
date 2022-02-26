@@ -11,8 +11,8 @@ async function main() {
   await nft.deployed();
 
 
-  let config = `export const nftMarketAddress = ${nftMarket.address};
-export const nftAddress = ${nft.address};`;
+  let config = `export const nftMarketAddress = "${nftMarket.address}";
+export const nftAddress = "${nft.address}";`;
 
   const data = JSON.stringify(config);
   fs.writeFileSync("config.js", JSON.parse(data));
