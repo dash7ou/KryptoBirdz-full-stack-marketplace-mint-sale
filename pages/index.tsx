@@ -48,6 +48,27 @@ const Home: NextPage = () => {
     }
   }
 
+
+  const buyNFT = async (nft: any): Promise<any> =>{
+    try{
+      const web3Modal = new Web3();
+      const connection = await web3Modal.connect();
+      const provider = new ethers.providers.Web3Provider(connection);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(nftMarketAddress, KBMarket.abi, signer);
+
+      const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
+      const transaction = await contract.createMarketSale(nftAddress, nft.tokenId, {
+        value: price
+      })
+      await transaction.wait();
+
+      await loadNfts();
+    }catch(err){
+
+    }
+  }
+
   useEffect(()=>{
 
   }, [])
