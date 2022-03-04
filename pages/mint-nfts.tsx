@@ -15,15 +15,17 @@ import {
 import NFT from "../artifacts/contracts/NFT.sol/NFT.json";
 import KBMarket from "../artifacts/contracts/KBMarket.sol/KBMarket.json";
 
-const client = ipfsHttpClient({
+const client = ipfsHttpClient(
+    {
     host: 'ipfs.infura.io',
     port: 5001,
     protocol: 'https',
     headers: {
         // authorization: 'Bearer ' + "6a5fd39831c349fcd4524899cd0efa16"
     },
-    apiPath: "/api/v0/add"
-});
+    apiPath: "/api/v0"
+}
+);
 
 const Home: NextPage = () => {
     const [fileUrl, setFileUrl] = useState<String | null>(null);
@@ -44,7 +46,7 @@ const Home: NextPage = () => {
             }
             );
 
-            const url = `https://ipfs.infura.io:5001/api/v0/${added.path}`;
+            const url = `https://ipfs.infura.io/ipfs/${added.path}`;
             setFileUrl(url);
         } catch (err) {
             console.log(err)
@@ -64,7 +66,7 @@ const Home: NextPage = () => {
 
             // upload to ipfs
             const added = await client.add(data);
-            const url = `https://ipfs.infura.io:5001/api/v0/${added.path}`;
+            const url = `https://ipfs.infura.io/ipfs/${added.path}`;
             await createSale(url);
         } catch (err) {
             console.log(err)
@@ -80,15 +82,15 @@ const Home: NextPage = () => {
             const signer = provider.getSigner();
 
             const contract = new ethers.Contract(nftAddress, NFT.abi, signer);
-            const transaction = await contract.createToken(url);
+            const transaction = await contract.mintToken(url);
             const tx = await transaction.wait();
 
-            const event = tx.event[0];
+            const event = tx.events[0];
             const value = event.args[2];
             const tokenId = +value;
             const price = ethers.utils.parseUnits(formInput.price, "ether");
 
-            const marketContract = new ethers.Contract(nftMarketAddress, NFT.abi, signer);
+            const marketContract = new ethers.Contract(nftMarketAddress, KBMarket.abi, signer);
             const listingPrice = (await marketContract.getListingPrice()).toString();
 
             const makeItemTransaction = await marketContract.makeMarketItem(nftAddress, tokenId, price, {
@@ -115,9 +117,9 @@ const Home: NextPage = () => {
                 <input placeholder="Asset Price in ETH" name="price" id="price" className='mt-2 border rounded p-4'
                     onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
                 />
-                {!fileUrl && <input type={"file"} name="asset" id="asset" className='mt-2 border rounded p-4'
+                <input type={"file"} name="asset" id="asset" className='mt-2 border rounded p-4'
                     onChange={onChange}
-                />}
+                />
                 {
                     fileUrl && (
                         <img src={fileUrl} alt="asset" className='rounded mt-4' width={"350px"} />
