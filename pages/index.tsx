@@ -91,7 +91,7 @@ const Home: NextPage = () => {
             {
               nfts.map((nft, i)=>(
                 <div className="border shadow rounded-x1 overflow-hidden" key={i}>
-                  <img src={nft?.image} alt={nft?.name} />
+                  <img style={{width: "100%", height: "14rem"}} src={nft?.image} alt={nft?.name} />
                   <div className="P-4">
                     <p style={{height: "64px"}} className="text-3x1 font-semibold">
                       {nft?.name}

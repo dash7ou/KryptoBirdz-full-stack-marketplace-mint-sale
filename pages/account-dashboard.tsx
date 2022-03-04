@@ -12,11 +12,10 @@ import {
 import NFT from "../artifacts/contracts/NFT.sol/NFT.json";
 import KBMarket from "../artifacts/contracts/KBMarket.sol/KBMarket.json";
 
-const MyAssets: NextPage = () => {
+const AccountDashboard: NextPage = () => {
   const [nfts, setNfTs] = useState<Array<any>>([]);
+  const [sold, setSold] = useState<Array<any>>([]);
   const [loadingState, setLoadingState] = useState<Boolean>(true);
-
-  console.log(nfts)
 
   const loadNfts = async (): Promise<any> =>{
     try{
@@ -29,7 +28,7 @@ const MyAssets: NextPage = () => {
         const marketContract = new ethers.Contract(nftMarketAddress, KBMarket.abi, provider);
         const items = [];
 
-        for await(let item of await marketContract.fetchMyNFTs()){
+        for await(let item of await marketContract.fetchItemsCreated()){
             const tokenUri = await tokenContract.tokenURI(item.tokenId);
             const meta = await axios.get(tokenUri);
             const price = ethers.utils.formatUnits(item.price.toString(), "ether");
@@ -41,10 +40,11 @@ const MyAssets: NextPage = () => {
                 owner: item.owner,
                 image: meta.data.image,
                 name: meta.data.name,
-                description: meta.data.description
+                description: meta.data.description,
+                sold: item.sold
             });
         };
-
+        setSold(items.filter(i=>i.sold));
         setNfTs(items);
         setLoadingState(false);
     }catch(err: any){
@@ -70,7 +70,10 @@ const MyAssets: NextPage = () => {
       <h1 className="px-20 py-7 text-4x1">loading</h1>
     ): (
       !loadingState && nfts.length > 0 ? (
-        <div className="flex justify-center">
+        <div className="p-4">
+            <h1 style={{fontSize: "20px", color:"purple"}}>
+                Token Minted
+            </h1>
           <div style={{maxWidth: "1600px"}} className="px-4"></div>
           <div className="grid grid-cols-1 sm:grid-cols2 lg:grid-cols-4 gap-4 pt-4">
             {
@@ -98,10 +101,10 @@ const MyAssets: NextPage = () => {
           </div>
         </div>
       ):(
-        <h1 className="px-20 py-7 text-4x1">You do not own any NFTs currently!</h1>
+        <h1 className="px-20 py-7 text-4x1">You have not minted any NFTs!</h1>
       )
     )
   )
 }
 
-export default MyAssets;
+export default AccountDashboard;
